@@ -11,17 +11,17 @@ close all
 Ratio_alias = 0.25; 
 
 % Path of raw data 
-folder_LV0 = 'H:\W_LV0\2018\';
-list_nc = dir([folder_LV0 '*\*\*.nc']);
+folder_LV0 = 'F:\data_needle\test_nc\';
+list_nc = dir([folder_LV0 '*.nc']);
 
 foldder_save_mat = 'F:\data_needle\mat_needle\'  ;
 
 error_flag = [];
 
 
-for indx_nc =  1 : length(list_nc) 
-    path_file = fullfile( list_nc(indx_nc).folder , list_nc(indx_nc).name );
-     fprintf('%s  \n', list_nc(indx_nc).name)
+for indx_nc =  1  : length(list_nc) 
+        path_file = fullfile( list_nc(indx_nc).folder , list_nc(indx_nc).name );
+        fprintf('%s  \n', list_nc(indx_nc).name)
      
     try
         range = ncread(path_file , 'range');
@@ -46,18 +46,22 @@ for indx_nc =  1 : length(list_nc)
         data_needle.Z_total  = [ ] ;
         data_needle.v_total  = [ ] ;
         data_needle.v_needle = [];
-        for indx_time  = 1  : 1  : length(time)
+        for indx_time  = 1 :  3  : length(time)
             current_spec_V_lin = [];
             current_spec_HV_lin = [];
 
-            current_spec_V_lin(:,:) = spec_V(indx_time , : ,:);
-            current_spec_HV_lin(:,:) = spec_HV(indx_time , : ,:);
+            current_spec_V_lin(:,:) = nanmean( spec_V(indx_time:indx_time+2 , : ,:) );
+            current_spec_HV_lin(:,:) = nanmean( spec_HV(indx_time:indx_time+2 , : ,:) );
 
+%              current_spec_V_lin(:,:) = spec_V(indx_time  , : ,:);
+%             current_spec_HV_lin(:,:) = spec_HV(indx_time  , : ,:);
+
+            
             % unfolding velocity
             [current_spec_V_lin_new, velocity] = ...
-                read_nc_LV0__VelocityFold_Ze_normalize(current_spec_V_lin, range_offsets, Ratio_alias, specN ,range  ,maxVel  );
+                read_nc_LV0__VelocityFold(current_spec_V_lin, range_offsets, Ratio_alias, specN ,range  ,maxVel  );
             [current_spec_HV_lin_new, velocity] = ...
-                read_nc_LV0__VelocityFold_Ze_normalize(current_spec_HV_lin, range_offsets, Ratio_alias, specN ,range  ,maxVel  );
+                read_nc_LV0__VelocityFold(current_spec_HV_lin, range_offsets, Ratio_alias, specN ,range  ,maxVel  );
 
             data_correct.current_spec_V_lin = current_spec_V_lin_new;
             data_correct.current_spec_HV_lin = current_spec_HV_lin_new;    
@@ -92,10 +96,10 @@ for indx_nc =  1 : length(list_nc)
             data_correct.current_spec_V_db  = 10*log10( data_correct.current_spec_V_lin);
             data_correct.current_spec_HV_db  = 10*log10( data_correct.current_spec_HV_lin);
 
-            % plot spectral Ze and LDR
-            %         ylim_range = [200 3500];
-            %         xlim_range = [-10 0.5];
-            %         plot_LV0_spectral_Ze_LDR(data_correct , range, specN,  range_offsets,ylim_range,xlim_range);
+            %   plot spectral Ze and LDR
+%             ylim_range = [200 3500];
+%             xlim_range = [-10 0.5];
+%             plot_LV0_spectral_Ze_LDR(data_correct , range, specN,  range_offsets,ylim_range,xlim_range);
 
             % calculate needle LDR
             data_needle.time = [data_needle.time data_correct.time];
