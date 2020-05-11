@@ -1,6 +1,6 @@
 function [ data_get_needle] = get_needle(data_correct , range, specN,   range_offsets);
 
-ldr_threshold = -17;
+ldr_threshold = -16;
 
 LDR = nan(size(range));
 Z_needle= nan(size(range));
@@ -11,7 +11,8 @@ v_needle = nan(size(range));
 v_needle_boundary = [-2 2];
 
 % spectra in chirp 1 
-Num_chirp = 1 ;% chirp 1
+Num_chirp = 1 ;% chirp 1 
+
 temp = abs(v_needle_boundary(1) - data_correct.v1 );  num_start = find(temp == min(temp));  num_start = num_start(1);
 temp = abs(v_needle_boundary(2) - data_correct.v1 ); num_ed = find(temp == min(temp)); num_ed = num_ed(1) ;
 
@@ -26,12 +27,10 @@ v_total(range_offsets(Num_chirp)+1:range_offsets(Num_chirp+1) ) =  ...
     nansum(data_correct.current_spec_V_lin(range_offsets(Num_chirp)+1:range_offsets(Num_chirp+1)  ,  1: specN(Num_chirp) )'.*data_correct.v1' ) ./ ...
     nansum(data_correct.current_spec_V_lin(range_offsets(Num_chirp)+1:range_offsets(Num_chirp+1)  ,  1: specN(Num_chirp) )') ; 
 
-
-
 spectra_ldr_copy = spectra_ldr;
 spectra_ldr_copy(spectra_ldr<ldr_threshold ) = nan;
-total_needle = sum(~isnan(spectra_ldr'));
-spectra_ldr(total_needle < 5,:) = nan;
+total_needle = sum(~isnan(spectra_ldr_copy'));
+spectra_ldr(total_needle < 4,:) = nan;
 spectra_ldr( isnan(spectra_ldr_copy)) = nan;
 
 spectra_V(isnan(spectra_ldr)) = nan;
@@ -43,6 +42,8 @@ Z_needle(range_offsets(Num_chirp)+1:range_offsets(Num_chirp+1) ) = nan;
 Z_needle(range_offsets(Num_chirp)+1:range_offsets(Num_chirp+1) ) =  10 * log10(   nansum(spectra_V') );
 v_needle(range_offsets(Num_chirp)+1:range_offsets(Num_chirp+1) )  =  nansum(spectra_V' .* data_correct.v1(num_start :num_ed )' ) ./ ...
      nansum(spectra_V');
+ 
+ 
  
 Num_chirp = 2 ;% chirp 2 
 temp = abs(v_needle_boundary(1) - data_correct.v2 );  num_start = find(temp == min(temp));  num_start = num_start(1);
@@ -61,8 +62,8 @@ v_total(range_offsets(Num_chirp)+1:range_offsets(Num_chirp+1) ) =  ...
 
 spectra_ldr_copy = spectra_ldr;
 spectra_ldr_copy(spectra_ldr<ldr_threshold ) = nan;
-total_needle = sum(~isnan(spectra_ldr'));
-spectra_ldr(total_needle < 5,:) = nan;
+total_needle = sum(~isnan(spectra_ldr_copy'));
+spectra_ldr(total_needle < 4,:) = nan;
 spectra_ldr( isnan(spectra_ldr_copy)) = nan;
 
 spectra_V(isnan(spectra_ldr)) = nan;
